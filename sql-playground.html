@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini SQL Runner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+<style>
+    body {
+        background: #0f0f0f;
+        color: #eee;
+        font-family: Arial;
+        margin: 0;
+        padding: 10px;
+        font-size: 14px;
+    }
+    #box {
+        background: #1b1b1b;
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 100%;
+    }
+    textarea {
+        width: 100%;
+        height: 100px;
+        background: #111;
+        color: #00ffa3;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 8px;
+        resize: none;
+    }
+    button {
+        width: 100%;
+        background: #00ffa3;
+        color: #000;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 8px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    table {
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+    th, td {
+        border: 1px solid #444;
+        padding:5px;
+        word-break: break-word;
+    }
+</style>
+</head>
+<body>
+<div id="box">
+    <textarea id="sql">SELECT sqlite_version();</textarea>
+    <button onclick="runSQL()">Run</button>
+    <div id="out"></div>
+</div>
+
+<script>
+let db;
+
+initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}` })
+.then(SQL => db = new SQL.Database());
+
+function runSQL() {
+    const sql = document.getElementById("sql").value;
+    const out = document.getElementById("out");
+    try {
+        const res = db.exec(sql);
+        if (!res.length) { out.innerHTML = "<p>No results.</p>"; return; }
+
+        let html = "<table><tr>";
+        res[0].columns.forEach(c => html += `<th>${c}</th>`);
+        html += "</tr>";
+
+        res[0].values.forEach(row => {
+            html += "<tr>";
+            row.forEach(v => html += `<td>${v}</td>`);
+            html += "</tr>";
+        });
+
+        html += "</table>";
+        out.innerHTML = html;
+    } catch (e) {
+        out.innerHTML = `<p style='color:red'>${e.message}</p>`;
+    }
+}
+</script>
+</body>
+  </html>
